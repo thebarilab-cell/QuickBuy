@@ -1,0 +1,207 @@
+@{
+    ViewData["Title"] = "Contact Us";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 mb-3">Contact Us</h1>
+                <p class="lead text-muted">We'd love to hear from you. Get in touch with us!</p>
+            </div>
+
+            <div class="row g-5">
+                <!-- Contact Information -->
+                <div class="col-lg-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h3 class="card-title mb-4">Get in Touch</h3>
+
+                            <div class="contact-info mb-4">
+                                <div class="d-flex mb-4">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-map-marker-alt fa-2x text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5>Our Address</h5>
+                                        <p class="text-muted mb-0">
+                                            123 Shopping Street<br>
+                                            E-commerce City, EC 12345<br>
+                                            United States
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex mb-4">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-phone fa-2x text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5>Phone Number</h5>
+                                        <p class="text-muted mb-0">
+                                            +1 (234) 567-8900<br>
+                                            Mon-Fri, 9:00 AM - 6:00 PM EST
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-envelope fa-2x text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5>Email Address</h5>
+                                        <p class="text-muted mb-0">
+                                            info@quickbuy.com<br>
+                                            support@quickbuy.com
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div>
+                                <h5 class="mb-3">Follow Us</h5>
+                                <div class="social-links">
+                                    <a href="#" class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fab fa-twitter"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fab fa-instagram"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-primary btn-sm">
+                                        <i class="fab fa-linkedin-in"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-5">
+                            <h3 class="card-title mb-4">Send us a Message</h3>
+
+                            @if (ViewData["SuccessMessage"] != null)
+                            {
+                                <div class="alert alert-success" role="alert">
+                                    @ViewData["SuccessMessage"]
+                                </div>
+                            }
+
+                            <form method="post">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="name" name="name" placeholder="Your Name" required>
+                                            <label for="name">Your Name *</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="email" class="form-control" id="email" name="email" placeholder="Your Email" required>
+                                            <label for="email">Your Email *</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject" required>
+                                            <label for="subject">Subject *</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea class="form-control" id="message" name="message" placeholder="Your Message" style="height: 150px;" required></textarea>
+                                            <label for="message">Your Message *</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter">
+                                            <label class="form-check-label" for="newsletter">
+                                                Subscribe to our newsletter for updates
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-paper-plane me-2"></i> Send Message
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Section -->
+                    <div class="card shadow-sm mt-4">
+                        <div class="card-body p-4">
+                            <h4 class="mb-4">Frequently Asked Questions</h4>
+                            <div class="accordion" id="faqAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                            How can I track my order?
+                                        </button>
+                                    </h2>
+                                    <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">
+                                            You can track your order by logging into your account and visiting the "My Orders" section.
+                                            You'll receive tracking information via email once your order is shipped.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                            What is your return policy?
+                                        </button>
+                                    </h2>
+                                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">
+                                            We offer a 30-day return policy for most items. Products must be in original condition
+                                            with all tags attached. Some items may have different return policies.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                            Do you ship internationally?
+                                        </button>
+                                    </h2>
+                                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">
+                                            Yes, we ship to most countries worldwide. Shipping costs and delivery times vary by
+                                            location. You can check shipping options during checkout.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Map Section -->
+<div class="container-fluid mt-5 p-0">
+    <div class="map-section">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.177858804427!2d-73.98784468459426!3d40.70555197933209!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a315cdf4c9b%3A0x8b934de5cae6f7a!2sWall%20St%2C%20New%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2s!4v1647426781234!5m2!1sen!2s"
+                width="100%"
+                height="400"
+                style="border:0;"
+                allowfullscreen=""
+                loading="lazy">
+        </iframe>
+    </div>
+</div>

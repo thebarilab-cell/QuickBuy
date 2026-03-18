@@ -1,0 +1,31 @@
+﻿@model IEnumerable<QuickBuy.Web.Models.UserVM>
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<h2 class="mb-4">Users Management</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Id</td>
+                <td>@user.FullName</td>   <!-- ✅ FIX HERE -->
+                <td>@user.Email</td>
+                <td>
+                    <span class="badge bg-primary">@user.Role</span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

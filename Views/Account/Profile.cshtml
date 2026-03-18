@@ -1,0 +1,378 @@
+@model QuickBuy.Web.Models.UserVM
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Account" asp-action="Profile">My Account</a></li>
+            <li class="breadcrumb-item active">Profile</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">My Account</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a asp-controller="Account" asp-action="Profile" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-user-circle me-2"></i> Profile
+                    </a>
+                    <a asp-controller="Order" asp-action="MyOrders" class="list-group-item list-group-item-action">
+                        <i class="fas fa-shopping-bag me-2"></i> My Orders
+                    </a>
+                    <a asp-controller="Cart" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="fas fa-shopping-cart me-2"></i> Shopping Cart
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="fas fa-heart me-2"></i> Wishlist
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="fas fa-map-marker-alt me-2"></i> Addresses
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="fas fa-cog me-2"></i> Settings
+                    </a>
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        <button type="submit" class="list-group-item list-group-item-action text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Account Summary -->
+            <div class="card mt-4">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div class="avatar-placeholder rounded-circle bg-primary d-inline-flex align-items-center justify-content-center"
+                             style="width: 80px; height: 80px;">
+                            <span class="text-white fs-4">@Model.FullName?[0]</span>
+                        </div>
+                    </div>
+                    <h5>@Model.FullName</h5>
+                    <p class="text-muted small">Member since @DateTime.Now.ToString("MMMM yyyy")</p>
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-qrcode me-2"></i> Loyalty Card
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Profile Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Profile Information</h4>
+                    <span class="badge bg-success">Verified Account</span>
+                </div>
+                <div class="card-body">
+                    <!-- Profile Form -->
+                    <form asp-action="Profile" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="row g-3">
+                            <!-- Personal Information -->
+                            <div class="col-12">
+                                <h5 class="mb-3 border-bottom pb-2">Personal Information</h5>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="FullName" class="form-control" placeholder="Full Name">
+                                    <label asp-for="FullName"></label>
+                                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="Email" class="form-control" placeholder="Email" readonly>
+                                    <label asp-for="Email"></label>
+                                    <small class="text-muted">Email cannot be changed</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="Phone Number">
+                                    <label asp-for="PhoneNumber"></label>
+                                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Shipping Address -->
+                            <div class="col-12 mt-4">
+                                <h5 class="mb-3 border-bottom pb-2">Shipping Address</h5>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input asp-for="Address" class="form-control" placeholder="Address">
+                                    <label asp-for="Address"></label>
+                                    <span asp-validation-for="Address" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input asp-for="City" class="form-control" placeholder="City">
+                                    <label asp-for="City"></label>
+                                    <span asp-validation-for="City" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input asp-for="State" class="form-control" placeholder="State">
+                                    <label asp-for="State"></label>
+                                    <span asp-validation-for="State" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input asp-for="ZipCode" class="form-control" placeholder="Zip Code">
+                                    <label asp-for="ZipCode"></label>
+                                    <span asp-validation-for="ZipCode" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Password Change -->
+                            <div class="col-12 mt-4">
+                                <h5 class="mb-3 border-bottom pb-2">Change Password</h5>
+                                <p class="text-muted small">Leave blank if you don't want to change password</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="Password" type="password" class="form-control" placeholder="New Password">
+                                    <label asp-for="Password">New Password</label>
+                                    <span asp-validation-for="Password" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirm Password">
+                                    <label asp-for="ConfirmPassword">Confirm New Password</label>
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="col-12 mt-4">
+                                <div class="d-flex justify-content-between">
+                                    <a href="#" class="btn btn-outline-danger">
+                                        <i class="fas fa-trash-alt me-2"></i> Delete Account
+                                    </a>
+                                    <div>
+                                        <button type="reset" class="btn btn-secondary me-2">
+                                            <i class="fas fa-redo me-2"></i> Reset
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i> Save Changes
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Account Stats -->
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-shopping-bag fa-2x text-primary mb-3"></i>
+                            <h3>12</h3>
+                            <p class="text-muted mb-0">Total Orders</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-star fa-2x text-warning mb-3"></i>
+                            <h3>245</h3>
+                            <p class="text-muted mb-0">Loyalty Points</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-gift fa-2x text-success mb-3"></i>
+                            <h3>3</h3>
+                            <p class="text-muted mb-0">Active Coupons</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="activity-timeline">
+                        <div class="activity-item d-flex">
+                            <div class="activity-icon me-3">
+                                <i class="fas fa-shopping-cart text-primary"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6 class="mb-1">Order Placed</h6>
+                                <p class="text-muted small mb-1">You placed order #ORD202400123</p>
+                                <span class="text-muted smaller">2 hours ago</span>
+                            </div>
+                        </div>
+
+                        <div class="activity-item d-flex mt-3">
+                            <div class="activity-icon me-3">
+                                <i class="fas fa-star text-warning"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6 class="mb-1">Review Added</h6>
+                                <p class="text-muted small mb-1">You reviewed "Wireless Headphones"</p>
+                                <span class="text-muted smaller">1 day ago</span>
+                            </div>
+                        </div>
+
+                        <div class="activity-item d-flex mt-3">
+                            <div class="activity-icon me-3">
+                                <i class="fas fa-map-marker-alt text-info"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6 class="mb-1">Address Updated</h6>
+                                <p class="text-muted small mb-1">You updated your shipping address</p>
+                                <span class="text-muted smaller">3 days ago</span>
+                            </div>
+                        </div>
+
+                        <div class="activity-item d-flex mt-3">
+                            <div class="activity-icon me-3">
+                                <i class="fas fa-user-check text-success"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6 class="mb-1">Profile Verified</h6>
+                                <p class="text-muted small mb-1">Your account has been verified</p>
+                                <span class="text-muted smaller">1 week ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-danger"><strong>Warning: This action cannot be undone!</strong></p>
+                <p>Are you sure you want to delete your account? This will:</p>
+                <ul class="text-muted">
+                    <li>Permanently delete your profile</li>
+                    <li>Remove all your order history</li>
+                    <li>Delete your saved addresses</li>
+                    <li>Remove your wishlist items</li>
+                </ul>
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="confirmDelete">
+                    <label class="form-check-label" for="confirmDelete">
+                        I understand that this action is permanent
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmAccountDelete" disabled>
+                    Delete My Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Delete account confirmation
+        $('.btn-outline-danger').click(function(e) {
+            e.preventDefault();
+            $('#deleteAccountModal').modal('show');
+        });
+
+        // Enable delete button when checkbox is checked
+        $('#confirmDelete').change(function() {
+            $('#confirmAccountDelete').prop('disabled', !$(this).is(':checked'));
+        });
+
+        // Confirm account deletion
+        $('#confirmAccountDelete').click(function() {
+            if (confirm('Are you absolutely sure? This cannot be undone!')) {
+                // In a real application, you would make an AJAX call here
+                // $.post('@Url.Action("DeleteAccount", "Account")', function(response) {
+                //     if (response.success) {
+                //         window.location.href = '@Url.Action("Index", "Home")';
+                //     }
+                // });
+
+                alert('Account deletion would be processed here. This is a demo.');
+                $('#deleteAccountModal').modal('hide');
+            }
+        });
+
+        // Form validation
+        $('form').submit(function(e) {
+            var password = $('#Password').val();
+            var confirmPassword = $('#ConfirmPassword').val();
+
+            if (password || confirmPassword) {
+                if (password.length < 6) {
+                    e.preventDefault();
+                    alert('Password must be at least 6 characters long');
+                    return false;
+                }
+
+                if (password !== confirmPassword) {
+                    e.preventDefault();
+                    alert('Passwords do not match');
+                    return false;
+                }
+            }
+        });
+
+        // Real-time validation
+        $('#Password, #ConfirmPassword').on('input', function() {
+            var password = $('#Password').val();
+            var confirmPassword = $('#ConfirmPassword').val();
+
+            if (password && confirmPassword && password === confirmPassword) {
+                $('#ConfirmPassword').removeClass('is-invalid').addClass('is-valid');
+            } else if (confirmPassword) {
+                $('#ConfirmPassword').removeClass('is-valid').addClass('is-invalid');
+            }
+        });
+    </script>
+}

@@ -1,0 +1,361 @@
+﻿@model QuickBuy.Models.Product
+@{
+    ViewData["Title"] = "Add New Product";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Add New Product</h1>
+        <a asp-action="Products" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Products
+        </a>
+    </div>
+
+    <!-- Add Product Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Product Information</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddProduct" method="post" enctype="multipart/form-data" id="addProductForm">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <!-- Product Name -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Name" class="form-label">Product Name *</label>
+                                <input asp-for="Name" class="form-control" placeholder="Enter product name" required>
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+
+                            <!-- Category -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CategoryId" class="form-label">Category *</label>
+                                <select asp-for="CategoryId" class="form-control" required>
+                                    <option value="">Select Category</option>
+                                    @foreach (var category in ViewBag.Categories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"
+                                      placeholder="Enter product description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <!-- Price -->
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="Price" class="form-label">Price ($) *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="Price" type="number" step="0.01" min="0.01"
+                                           class="form-control" placeholder="0.00" required>
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+
+                            <!-- Discount Price -->
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="DiscountPrice" class="form-label">Discount Price ($)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="DiscountPrice" type="number" step="0.01" min="0"
+                                           class="form-control" placeholder="0.00">
+                                </div>
+                                <span asp-validation-for="DiscountPrice" class="text-danger"></span>
+                            </div>
+
+                            <!-- Stock Quantity -->
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="StockQuantity" class="form-label">Stock Quantity *</label>
+                                <input asp-for="StockQuantity" type="number" min="0" class="form-control" required>
+                                <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Status</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           id="isActiveSwitch" asp-for="IsActive" checked>
+                                    <label class="form-check-label" for="isActiveSwitch">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div class="mb-3">
+                            <label class="form-label">Upload Product Image *</label>
+                            <input type="file" class="form-control" id="imageUpload"
+                                   accept=".jpg,.jpeg,.png,.gif,.webp" required>
+                            <small class="text-muted">Recommended size: 800x800px. Max size: 2MB</small>
+                            <div class="mt-2" id="imagePreview" style="display: none;">
+                                <img id="previewImage" class="img-thumbnail"
+                                     style="width: 200px; height: 200px; object-fit: cover;">
+                            </div>
+                        </div>
+
+                        <!-- Image URL (Alternative) -->
+                        <div class="mb-4">
+                            <label class="form-label">Or Enter Image URL</label>
+                            <div class="input-group">
+                                <input type="url" class="form-control" id="imageUrlInput"
+                                       placeholder="https://example.com/image.jpg">
+                                <button type="button" class="btn btn-outline-secondary"
+                                        onclick="useImageUrl()">
+                                    Use URL
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="accordion mb-4" id="additionalInfoAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#additionalInfo">
+                                        Additional Information (Optional)
+                                    </button>
+                                </h2>
+                                <div id="additionalInfo" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Weight (kg)</label>
+                                                <input type="number" step="0.01" min="0"
+                                                       class="form-control" placeholder="0.00">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Dimensions (L x W x H)</label>
+                                                <input type="text" class="form-control"
+                                                       placeholder="e.g., 10 x 5 x 3">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Manufacturer</label>
+                                            <input type="text" class="form-control"
+                                                   placeholder="Manufacturer name">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Warranty</label>
+                                            <input type="text" class="form-control"
+                                                   placeholder="e.g., 1 Year">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Products" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i> Add Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Preview -->
+        <div class="col-lg-4">
+            <div class="card shadow sticky-top" style="top: 20px;">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Product Preview</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <!-- Product Image -->
+                        <div class="mb-3">
+                            <img id="previewProductImage" src="/images/default-product.png"
+                                 class="img-fluid rounded" style="max-height: 200px;"
+                                 alt="Product Preview">
+                        </div>
+
+                        <!-- Product Info -->
+                        <h5 id="previewProductName" class="text-truncate">Product Name</h5>
+                        <div class="mb-2">
+                            <span id="previewProductPrice" class="fs-4 fw-bold text-danger">
+                                $0.00
+                            </span>
+                            <span id="previewOriginalPrice" class="text-muted text-decoration-line-through ms-2"
+                                  style="display: none;">
+                                $0.00
+                            </span>
+                        </div>
+
+                        <!-- Rating -->
+                        <div class="mb-3">
+                            <div class="text-warning">
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <small class="text-muted">No reviews yet</small>
+                        </div>
+
+                        <p id="previewProductDescription" class="text-muted small">
+                            Product description will appear here.
+                        </p>
+
+                        <!-- Stock Status -->
+                        <div class="mb-3">
+                            <span id="previewStockStatus" class="badge bg-danger">
+                                Out of stock
+                            </span>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="mb-3">
+                            <span class="badge bg-info" id="previewCategory">Category</span>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <button class="btn btn-primary w-100" disabled>
+                            <i class="fas fa-cart-plus me-2"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Image preview for file upload
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Check file size (max 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('File size should be less than 2MB');
+                    this.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImage').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    // Update live preview
+                    document.getElementById('previewProductImage').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Use image URL
+        function useImageUrl() {
+            const url = document.getElementById('imageUrlInput').value;
+            if (url) {
+                document.getElementById('previewProductImage').src = url;
+            }
+        }
+
+        // Live preview updates
+        document.getElementById('Name').addEventListener('input', function(e) {
+            document.getElementById('previewProductName').textContent = e.target.value || 'Product Name';
+        });
+
+        document.getElementById('Description').addEventListener('input', function(e) {
+            const desc = e.target.value;
+            document.getElementById('previewProductDescription').textContent =
+                desc.length > 100 ? desc.substring(0, 100) + '...' : (desc || 'Product description will appear here.');
+        });
+
+        document.getElementById('CategoryId').addEventListener('change', function(e) {
+            const selectedOption = this.options[this.selectedIndex];
+            document.getElementById('previewCategory').textContent =
+                selectedOption.text || 'Category';
+        });
+
+        document.getElementById('Price').addEventListener('input', updatePricePreview);
+        document.getElementById('DiscountPrice').addEventListener('input', updatePricePreview);
+
+        function updatePricePreview() {
+            const price = parseFloat(document.getElementById('Price').value) || 0;
+            const discount = parseFloat(document.getElementById('DiscountPrice').value) || 0;
+
+            if (discount > 0) {
+                document.getElementById('previewProductPrice').textContent = '$' + discount.toFixed(2);
+                document.getElementById('previewOriginalPrice').textContent = '$' + price.toFixed(2);
+                document.getElementById('previewOriginalPrice').style.display = 'inline';
+            } else {
+                document.getElementById('previewProductPrice').textContent = '$' + price.toFixed(2);
+                document.getElementById('previewOriginalPrice').style.display = 'none';
+            }
+        }
+
+        document.getElementById('StockQuantity').addEventListener('input', function(e) {
+            const stock = parseInt(e.target.value) || 0;
+            const badge = document.getElementById('previewStockStatus');
+
+            if (stock > 20) {
+                badge.className = 'badge bg-success';
+                badge.textContent = stock + ' in stock';
+            } else if (stock > 0) {
+                badge.className = 'badge bg-warning';
+                badge.textContent = stock + ' low stock';
+            } else {
+                badge.className = 'badge bg-danger';
+                badge.textContent = 'Out of stock';
+            }
+        });
+
+        // Status switch
+        document.getElementById('isActiveSwitch').addEventListener('change', function(e) {
+            const label = e.target.nextElementSibling;
+            label.textContent = e.target.checked ? 'Active' : 'Inactive';
+        });
+
+        // Form validation
+        document.getElementById('addProductForm').addEventListener('submit', function(e) {
+            // Basic validation
+            const name = document.getElementById('Name').value;
+            const price = document.getElementById('Price').value;
+            const category = document.getElementById('CategoryId').value;
+            const stock = document.getElementById('StockQuantity').value;
+            const imageFile = document.getElementById('imageUpload').files[0];
+
+            if (!name || !price || !category || !stock) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            if (!imageFile && !document.getElementById('imageUrlInput').value) {
+                e.preventDefault();
+                alert('Please upload an image or provide an image URL.');
+                return;
+            }
+        });
+
+        // Initialize form with default values for preview
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default category preview
+            const categorySelect = document.getElementById('CategoryId');
+            if (categorySelect.options.length > 0) {
+                document.getElementById('previewCategory').textContent =
+                    categorySelect.options[0].text;
+            }
+        });
+    </script>
+}

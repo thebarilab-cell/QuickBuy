@@ -1,0 +1,352 @@
+@model QuickBuy.Web.Models.CartVM
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item active">Shopping Cart</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Your Shopping Cart</h4>
+                        <span class="badge bg-primary">@Model.TotalItems items</span>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    @if (Model.IsEmpty)
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
+                            <h3>Your cart is empty</h3>
+                            <p class="text-muted mb-4">Looks like you haven't added any items to your cart yet.</p>
+                            <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-lg">
+                                <i class="fas fa-shopping-bag me-2"></i> Start Shopping
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Cart Items Table -->
+                        <div class="table-responsive">
+                            <table class="table cart-table">
+                                <thead>
+                                    <tr>
+                                        <th width="100">Product</th>
+                                        <th>Details</th>
+                                        <th width="120">Price</th>
+                                        <th width="150">Quantity</th>
+                                        <th width="120">Total</th>
+                                        <th width="50"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.Items)
+                                    {
+                                        <tr class="cart-item-row" data-item-id="@item.Id">
+                                            <td>
+                                                <img src="@item.ProductImage" class="img-thumbnail" alt="@item.ProductName"
+                                                     style="width: 80px; height: 80px; object-fit: cover;">
+                                            </td>
+                                            <td>
+                                                <h6 class="mb-1">@item.ProductName</h6>
+                                                <div class="text-muted small">
+                                                    @if (item.IsDiscount)
+                                                    {
+                                                        <span class="text-success">
+                                                            <i class="fas fa-tag me-1"></i> You save $@item.Savings.ToString("N2")
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Regular Price</span>
+                                                    }
+                                                </div>
+                                                <div class="stock-info small">
+                                                    @if (item.StockQuantity > 10)
+                                                    {
+                                                        <span class="text-success"><i class="fas fa-check-circle"></i> In Stock</span>
+                                                    }
+                                                    else if (item.StockQuantity > 0)
+                                                    {
+                                                        <span class="text-warning"><i class="fas fa-exclamation-circle"></i> Only @item.StockQuantity left</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="price-info">
+                                                    @if (item.IsDiscount)
+                                                    {
+                                                        <div>
+                                                            <span class="text-danger fw-bold">$@item.UnitPrice.ToString("N2")</span>
+                                                            <div>
+                                                                <small class="text-muted text-decoration-line-through">$@item.Price.ToString("N2")</small>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="fw-bold">$@item.Price.ToString("N2")</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="quantity-control">
+                                                    <div class="input-group input-group-sm" style="width: 120px;">
+                                                        <button class="btn btn-outline-secondary" type="button"
+                                                                onclick="updateQuantity(@item.Id, @item.Quantity - 1)"
+                                                                @(item.Quantity <= 1 ? "disabled" : "")>
+                                                            <i class="fas fa-minus"></i>
+                                                        </button>
+                                                        <input type="number" class="form-control text-center"
+                                                               value="@item.Quantity" min="1" max="@item.StockQuantity"
+                                                               id="quantity-@item.Id"
+                                                               onchange="updateQuantity(@item.Id, this.value)">
+                                                        <button class="btn btn-outline-secondary" type="button"
+                                                                onclick="updateQuantity(@item.Id, @item.Quantity + 1)"
+                                                                @(item.Quantity >= item.StockQuantity ? "disabled" : "")>
+                                                            <i class="fas fa-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                    <small class="text-muted">Max: @item.StockQuantity</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold">$@item.TotalPrice.ToString("N2")</span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        onclick="removeItem(@item.Id)"
+                                                        title="Remove item">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Cart Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i> Continue Shopping
+                            </a>
+                            <form asp-action="ClearCart" method="post">
+                                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to clear your cart?')">
+                                    <i class="fas fa-trash me-2"></i> Clear Cart
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Recently Viewed -->
+            @if (!Model.IsEmpty)
+            {
+                <div class="card mt-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Recently Viewed</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- Sample recently viewed items -->
+                            <div class="col-3">
+                                <div class="text-center">
+                                    <img src="https://via.placeholder.com/80" class="img-thumbnail mb-2" alt="Product">
+                                    <h6 class="small mb-1">Product Name</h6>
+                                    <span class="text-primary small">$29.99</span>
+                                </div>
+                            </div>
+                            <!-- Add more items as needed -->
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    @if (!Model.IsEmpty)
+                    {
+                        <div class="summary-details">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal (@Model.TotalItems items)</span>
+                                <span class="fw-bold">$@Model.Subtotal.ToString("N2")</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Shipping</span>
+                                @if (Model.Subtotal > 50)
+                                {
+                                    <span class="text-success">FREE</span>
+                                }
+                                else
+                                {
+                                    <span>$@Model.Shipping.ToString("N2")</span>
+                                }
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>Tax</span>
+                                <span>$@Model.Tax.ToString("N2")</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between mb-4">
+                                <h5>Total</h5>
+                                <h5 class="text-primary">$@Model.Total.ToString("N2")</h5>
+                            </div>
+
+                            <!-- Promo Code -->
+                            <div class="mb-4">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Promo code" id="promoCode">
+                                    <button class="btn btn-outline-primary" type="button" onclick="applyPromoCode()">Apply</button>
+                                </div>
+                                <div id="promoMessage" class="mt-2 small"></div>
+                            </div>
+
+                            <!-- Checkout Button -->
+                            <a asp-controller="Order" asp-action="Checkout" class="btn btn-primary btn-lg w-100 mb-3">
+                                <i class="fas fa-lock me-2"></i> Proceed to Checkout
+                            </a>
+
+                            <!-- Payment Methods -->
+                            <div class="text-center mb-3">
+                                <small class="text-muted">We accept</small>
+                                <div class="mt-2">
+                                    <i class="fab fa-cc-visa fa-2x text-muted mx-2"></i>
+                                    <i class="fab fa-cc-mastercard fa-2x text-muted mx-2"></i>
+                                    <i class="fab fa-cc-amex fa-2x text-muted mx-2"></i>
+                                    <i class="fab fa-cc-paypal fa-2x text-muted mx-2"></i>
+                                </div>
+                            </div>
+
+                            <!-- Security Info -->
+                            <div class="alert alert-light small">
+                                <i class="fas fa-shield-alt text-success me-2"></i>
+                                <strong>Secure checkout</strong>
+                                <p class="mb-0 mt-1">Your payment information is encrypted and secure.</p>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">Add items to your cart to see order summary.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Customer Support -->
+            <div class="card mt-4">
+                <div class="card-body text-center">
+                    <i class="fas fa-headset fa-2x text-primary mb-3"></i>
+                    <h5>Need Help?</h5>
+                    <p class="small text-muted">Our customer support team is available 24/7</p>
+                    <a href="tel:+12345678900" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-phone me-2"></i> Call Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Update quantity function
+        function updateQuantity(itemId, newQuantity) {
+            if (newQuantity < 1) {
+                newQuantity = 1;
+            }
+
+            // Update the input field
+            $('#quantity-' + itemId).val(newQuantity);
+
+            // Send AJAX request to update cart
+            $.post('@Url.Action("UpdateQuantity", "Cart")', {
+                cartItemId: itemId,
+                quantity: newQuantity
+            }, function(response) {
+                if (response.success) {
+                    // Reload the page to update totals
+                    location.reload();
+                } else {
+                    alert('Failed to update quantity');
+                }
+            }).fail(function() {
+                alert('An error occurred. Please try again.');
+            });
+        }
+
+        // Remove item function
+        function removeItem(itemId) {
+            if (confirm('Are you sure you want to remove this item from your cart?')) {
+                $.post('@Url.Action("RemoveItem", "Cart")', {
+                    cartItemId: itemId
+                }, function(response) {
+                    if (response.success) {
+                        // Remove the row from table
+                        $('.cart-item-row[data-item-id="' + itemId + '"]').fadeOut(300, function() {
+                            $(this).remove();
+                            // Reload the page if cart is empty
+                            if ($('.cart-item-row').length === 0) {
+                                location.reload();
+                            }
+                        });
+                        // Update cart count
+                        updateCartCount();
+                    } else {
+                        alert('Failed to remove item');
+                    }
+                }).fail(function() {
+                    alert('An error occurred. Please try again.');
+                });
+            }
+        }
+
+        // Apply promo code function
+        function applyPromoCode() {
+            var promoCode = $('#promoCode').val();
+            if (!promoCode.trim()) {
+                $('#promoMessage').html('<span class="text-danger">Please enter a promo code</span>');
+                return;
+            }
+
+            $('#promoMessage').html('<span class="text-warning"><i class="fas fa-spinner fa-spin"></i> Applying...</span>');
+
+            // Simulate promo code validation
+            setTimeout(function() {
+                if (promoCode.toUpperCase() === 'SAVE10') {
+                    $('#promoMessage').html('<span class="text-success"><i class="fas fa-check"></i> 10% discount applied!</span>');
+                    // Update total calculation would go here
+                } else {
+                    $('#promoMessage').html('<span class="text-danger"><i class="fas fa-times"></i> Invalid promo code</span>');
+                }
+            }, 1000);
+        }
+
+        // Update cart count in navbar
+        function updateCartCount() {
+            $.get('@Url.Action("GetCartCount", "Cart")', function(data) {
+                $('#cartCount').text(data.count);
+            });
+        }
+    </script>
+}

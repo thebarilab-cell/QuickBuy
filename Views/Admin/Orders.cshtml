@@ -1,0 +1,292 @@
+@model IEnumerable<QuickBuy.Models.Order>
+@{
+    ViewData["Title"] = "Orders Management";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Orders Management</h1>
+        <div>
+            <span class="badge bg-info">Total: @Model.Count() orders</span>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filter Orders</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <input type="date" name="startDate" class="form-control" placeholder="Start Date">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="endDate" class="form-control" placeholder="End Date">
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-control">
+                        <option value="">All Status</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-2"></i> Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">All Orders</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="ordersTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Amount</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@order.OrderNumber</strong><br>
+                                    <small class="text-muted">ID: @order.Id</small>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>@order.User?.FullName</strong><br>
+                                        <small class="text-muted">@order.User?.Email</small>
+                                    </div>
+                                </td>
+                                <td>@order.OrderDate.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        @order.OrderItems?.Count() items
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong>$@order.TotalAmount.ToString("N2")</strong>
+                                </td>
+                                <td>
+                                    <span class="badge @(order.PaymentStatus == "Paid" ? "bg-success" : "bg-warning")">
+                                        @order.PaymentStatus
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge @GetStatusBadgeClass(order.OrderStatus) me-2">
+                                            @order.OrderStatus
+                                        </span>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light" type="button"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <button class="dropdown-item" onclick="updateOrderStatus(@order.Id, 'Processing')">
+                                                        <i class="fas fa-sync me-2"></i> Processing
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button class="dropdown-item" onclick="updateOrderStatus(@order.Id, 'Shipped')">
+                                                        <i class="fas fa-shipping-fast me-2"></i> Shipped
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button class="dropdown-item" onclick="updateOrderStatus(@order.Id, 'Delivered')">
+                                                        <i class="fas fa-check-circle me-2"></i> Delivered
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button class="dropdown-item text-danger" onclick="updateOrderStatus(@order.Id, 'Cancelled')">
+                                                        <i class="fas fa-times-circle me-2"></i> Cancelled
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="OrderDetails" asp-route-id="@order.Id"
+                                           class="btn btn-sm btn-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("OrderDetails", "Admin", new { id = order.Id })#invoice"
+                                           class="btn btn-sm btn-secondary" title="Invoice" target="_blank">
+                                            <i class="fas fa-file-invoice"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-success"
+                                                onclick="sendNotification(@order.Id)" title="Send Update">
+                                            <i class="fas fa-bell"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (ViewBag.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        @if (ViewBag.CurrentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Orders", new { page = ViewBag.CurrentPage - 1, status = ViewBag.Status })">
+                                    Previous
+                                </a>
+                            </li>
+                        }
+
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Orders", new { page = i, status = ViewBag.Status })">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Orders", new { page = ViewBag.CurrentPage + 1, status = ViewBag.Status })">
+                                    Next
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Order Status Update Modal -->
+<div class="modal fade" id="statusUpdateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Order Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="orderStatusSelect" class="form-label">Select Status</label>
+                    <select class="form-select" id="orderStatusSelect">
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="statusNotes" class="form-label">Notes (Optional)</label>
+                    <textarea class="form-control" id="statusNotes" rows="3"
+                              placeholder="Add any notes about this status change..."></textarea>
+                </div>
+                <input type="hidden" id="orderIdForStatus">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusUpdate">Update Status</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Update order status
+        function updateOrderStatus(orderId, status) {
+            $('#orderIdForStatus').val(orderId);
+            $('#orderStatusSelect').val(status);
+            $('#statusUpdateModal').modal('show');
+        }
+
+        // Confirm status update
+        $('#confirmStatusUpdate').click(function() {
+            var orderId = $('#orderIdForStatus').val();
+            var status = $('#orderStatusSelect').val();
+            var notes = $('#statusNotes').val();
+
+            $.post('@Url.Action("UpdateOrderStatus", "Admin")', {
+                orderId: orderId,
+                status: status,
+                notes: notes
+            }, function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('Failed to update order status');
+                }
+            }).fail(function() {
+                alert('An error occurred. Please try again.');
+            });
+        });
+
+        // Send notification
+        function sendNotification(orderId) {
+            if (confirm('Send status update notification to customer?')) {
+                $.post('@Url.Action("SendNotification", "Admin")', { orderId: orderId }, function(response) {
+                    if (response.success) {
+                        alert('Notification sent successfully!');
+                    } else {
+                        alert('Failed to send notification');
+                    }
+                });
+            }
+        }
+
+        // Initialize DataTable
+        $(document).ready(function() {
+            $('#ordersTable').DataTable({
+                pageLength: 10,
+                order: [[2, 'desc']],
+                responsive: true,
+                columnDefs: [
+                    { orderable: false, targets: [7] }
+                ]
+            });
+        });
+    </script>
+}
+
+@functions {
+    public string GetStatusBadgeClass(string status)
+    {
+        return status.ToLower() switch
+        {
+            "processing" => "bg-warning",
+            "shipped" => "bg-info",
+            "delivered" => "bg-success",
+            "cancelled" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}

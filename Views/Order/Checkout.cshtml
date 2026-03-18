@@ -1,0 +1,562 @@
+@model QuickBuy.Web.Models.CheckoutVM
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Cart" asp-action="Index">Cart</a></li>
+            <li class="breadcrumb-item active">Checkout</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4">Checkout</h1>
+
+    <div class="row">
+        <!-- Checkout Form -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <ul class="nav nav-pills nav-fill" id="checkoutTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping">
+                                <i class="fas fa-map-marker-alt me-2"></i> Shipping
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment">
+                                <i class="fas fa-credit-card me-2"></i> Payment
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review">
+                                <i class="fas fa-clipboard-check me-2"></i> Review
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="Checkout" method="post" id="checkoutForm">
+                        @Html.AntiForgeryToken()
+
+                        <div class="tab-content" id="checkoutTabsContent">
+                            <!-- Shipping Tab -->
+                            <div class="tab-pane fade show active" id="shipping" role="tabpanel">
+                                <h5 class="mb-4">Shipping Information</h5>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="FullName" class="form-control" placeholder="Full Name">
+                                            <label asp-for="FullName"></label>
+                                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="Email" class="form-control" placeholder="Email">
+                                            <label asp-for="Email"></label>
+                                            <span asp-validation-for="Email" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="PhoneNumber" class="form-control" placeholder="Phone Number">
+                                            <label asp-for="PhoneNumber"></label>
+                                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <input asp-for="Address" class="form-control" placeholder="Address">
+                                            <label asp-for="Address"></label>
+                                            <span asp-validation-for="Address" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating">
+                                            <input asp-for="City" class="form-control" placeholder="City">
+                                            <label asp-for="City"></label>
+                                            <span asp-validation-for="City" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating">
+                                            <input asp-for="State" class="form-control" placeholder="State">
+                                            <label asp-for="State"></label>
+                                            <span asp-validation-for="State" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-floating">
+                                            <input asp-for="ZipCode" class="form-control" placeholder="Zip Code">
+                                            <label asp-for="ZipCode"></label>
+                                            <span asp-validation-for="ZipCode" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea asp-for="OrderNotes" class="form-control" placeholder="Order Notes" style="height: 100px;"></textarea>
+                                            <label asp-for="OrderNotes">Order Notes (Optional)</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Shipping Method -->
+                                <div class="mt-4">
+                                    <h6 class="mb-3">Shipping Method</h6>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="shippingMethod" id="standardShipping" value="standard" checked>
+                                        <label class="form-check-label" for="standardShipping">
+                                            <strong>Standard Shipping</strong>
+                                            <span class="text-muted d-block">3-5 business days</span>
+                                            @if (Model.Subtotal > 50)
+                                            {
+                                                <span class="text-success">FREE</span>
+                                            }
+                                            else
+                                            {
+                                                <span>$5.99</span>
+                                            }
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="shippingMethod" id="expressShipping" value="express">
+                                        <label class="form-check-label" for="expressShipping">
+                                            <strong>Express Shipping</strong>
+                                            <span class="text-muted d-block">1-2 business days</span>
+                                            <span>$9.99</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between mt-4">
+                                    <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i> Back to Cart
+                                    </a>
+                                    <button type="button" class="btn btn-primary" onclick="nextTab('payment')">
+                                        Continue to Payment <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Payment Tab -->
+                            <div class="tab-pane fade" id="payment" role="tabpanel">
+                                <h5 class="mb-4">Payment Information</h5>
+
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <input asp-for="CardHolderName" class="form-control" placeholder="Card Holder Name">
+                                            <label asp-for="CardHolderName"></label>
+                                            <span asp-validation-for="CardHolderName" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <input asp-for="CardNumber" class="form-control" placeholder="Card Number">
+                                            <label asp-for="CardNumber"></label>
+                                            <span asp-validation-for="CardNumber" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="ExpiryDate" class="form-control" placeholder="MM/YY">
+                                            <label asp-for="ExpiryDate">Expiry Date (MM/YY)</label>
+                                            <span asp-validation-for="ExpiryDate" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input asp-for="CVV" class="form-control" placeholder="CVV">
+                                            <label asp-for="CVV"></label>
+                                            <span asp-validation-for="CVV" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Methods -->
+                                <div class="mt-4">
+                                    <h6 class="mb-3">Payment Method</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-check card">
+                                                <input class="form-check-input" type="radio" name="paymentType" id="creditCard" value="card" checked>
+                                                <label class="form-check-label p-3" for="creditCard">
+                                                    <i class="fab fa-cc-visa fa-2x me-2"></i>
+                                                    <i class="fab fa-cc-mastercard fa-2x me-2"></i>
+                                                    <i class="fab fa-cc-amex fa-2x"></i>
+                                                    <span class="d-block mt-2">Credit/Debit Card</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check card">
+                                                <input class="form-check-input" type="radio" name="paymentType" id="paypal" value="paypal">
+                                                <label class="form-check-label p-3" for="paypal">
+                                                    <i class="fab fa-paypal fa-2x text-primary"></i>
+                                                    <span class="d-block mt-2">PayPal</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-light mt-4">
+                                    <i class="fas fa-lock text-success me-2"></i>
+                                    <strong>Secure Payment</strong>
+                                    <p class="mb-0 mt-1 small">Your payment information is encrypted and secure. We don't store your credit card details.</p>
+                                </div>
+
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="prevTab('shipping')">
+                                        <i class="fas fa-arrow-left me-2"></i> Back to Shipping
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="nextTab('review')">
+                                        Review Order <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Review Tab -->
+                            <div class="tab-pane fade" id="review" role="tabpanel">
+                                <h5 class="mb-4">Review Your Order</h5>
+
+                                <!-- Order Summary -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-white">
+                                        <h6 class="mb-0">Order Summary</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="order-items">
+                                            <!-- Items would be dynamically loaded -->
+                                            <div class="order-item d-flex justify-content-between mb-2">
+                                                <div>
+                                                    <strong>Product Name</strong>
+                                                    <div class="text-muted small">Qty: 1</div>
+                                                </div>
+                                                <div class="text-end">
+                                                    <strong>$29.99</strong>
+                                                </div>
+                                            </div>
+                                            <!-- More items -->
+                                        </div>
+
+                                        <hr>
+
+                                        <div class="order-totals">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Subtotal</span>
+                                                <span>$@Model.Subtotal.ToString("N2")</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Shipping</span>
+                                                <span>
+                                                    @if (Model.Subtotal > 50)
+                                                    {
+                                                        <span class="text-success">FREE</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>$@Model.Shipping.ToString("N2")</span>
+                                                    }
+                                                </span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Tax</span>
+                                                <span>$@Model.Tax.ToString("N2")</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-3 pt-3 border-top">
+                                                <h5>Total</h5>
+                                                <h5 class="text-primary">$@Model.Total.ToString("N2")</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Shipping Information -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-white">
+                                        <h6 class="mb-0">Shipping Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="shippingReview">
+                                            <!-- Shipping info will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Information -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-white">
+                                        <h6 class="mb-0">Payment Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="paymentReview">
+                                            <!-- Payment info will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Terms and Conditions -->
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="terms" required>
+                                    <label class="form-check-label" for="terms">
+                                        I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a> and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
+                                    </label>
+                                </div>
+
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="prevTab('payment')">
+                                        <i class="fas fa-arrow-left me-2"></i> Back to Payment
+                                    </button>
+                                    <button type="submit" class="btn btn-success btn-lg" id="placeOrderBtn">
+                                        <i class="fas fa-check-circle me-2"></i> Place Order
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Items list -->
+                    <div class="order-items-sidebar mb-3">
+                        <!-- Items would be dynamically loaded -->
+                        <div class="d-flex mb-2">
+                            <img src="https://via.placeholder.com/50" class="rounded me-2" alt="Product">
+                            <div class="flex-grow-1">
+                                <div class="small">Product Name</div>
+                                <div class="small text-muted">Qty: 1 × $29.99</div>
+                            </div>
+                            <div class="text-end">$29.99</div>
+                        </div>
+                        <!-- More items -->
+                    </div>
+
+                    <hr>
+
+                    <!-- Totals -->
+                    <div class="order-totals-sidebar">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal</span>
+                            <span>$@Model.Subtotal.ToString("N2")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping</span>
+                            <span>
+                                @if (Model.Subtotal > 50)
+                                {
+                                    <span class="text-success">FREE</span>
+                                }
+                                else
+                                {
+                                    <span>$@Model.Shipping.ToString("N2")</span>
+                                }
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Tax</span>
+                            <span>$@Model.Tax.ToString("N2")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3 pt-3 border-top">
+                            <h5>Total</h5>
+                            <h5 class="text-primary">$@Model.Total.ToString("N2")</h5>
+                        </div>
+                    </div>
+
+                    <!-- Security Badge -->
+                    <div class="text-center mt-4">
+                        <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                        <p class="small text-muted mb-0">100% Secure Checkout</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Need Help -->
+            <div class="card mt-4">
+                <div class="card-body text-center">
+                    <i class="fas fa-question-circle fa-2x text-primary mb-3"></i>
+                    <h6>Need Help?</h6>
+                    <p class="small text-muted mb-3">Contact our customer support team</p>
+                    <a href="tel:+12345678900" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="fas fa-phone me-2"></i> (123) 456-7890
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Terms content -->
+                <p>Terms and conditions content goes here...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Privacy Modal -->
+<div class="modal fade" id="privacyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Privacy Policy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Privacy policy content -->
+                <p>Privacy policy content goes here...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tab navigation
+        function nextTab(nextTabId) {
+            // Validate current tab before proceeding
+            if (validateCurrentTab()) {
+                var nextTab = document.getElementById(nextTabId + '-tab');
+                var tab = new bootstrap.Tab(nextTab);
+                tab.show();
+
+                // Update review section
+                updateReview();
+            }
+        }
+
+        function prevTab(prevTabId) {
+            var prevTab = document.getElementById(prevTabId + '-tab');
+            var tab = new bootstrap.Tab(prevTab);
+            tab.show();
+        }
+
+        function validateCurrentTab() {
+            var activeTab = document.querySelector('.nav-link.active');
+            var tabId = activeTab.id.replace('-tab', '');
+
+            // Validate based on current tab
+            switch(tabId) {
+                case 'shipping':
+                    return validateShipping();
+                case 'payment':
+                    return validatePayment();
+                default:
+                    return true;
+            }
+        }
+
+        function validateShipping() {
+            // Simple validation - in production, use proper validation
+            var requiredFields = ['FullName', 'Email', 'PhoneNumber', 'Address', 'City', 'State', 'ZipCode'];
+            var isValid = true;
+
+            requiredFields.forEach(function(field) {
+                var input = document.getElementById(field);
+                if (!input.value.trim()) {
+                    isValid = false;
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+
+            if (!isValid) {
+                alert('Please fill all required shipping fields.');
+            }
+
+            return isValid;
+        }
+
+        function validatePayment() {
+            // Simple validation
+            var requiredFields = ['CardHolderName', 'CardNumber', 'ExpiryDate', 'CVV'];
+            var isValid = true;
+
+            requiredFields.forEach(function(field) {
+                var input = document.getElementById(field);
+                if (!input.value.trim()) {
+                    isValid = false;
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+
+            if (!isValid) {
+                alert('Please fill all required payment fields.');
+            }
+
+            return isValid;
+        }
+
+        function updateReview() {
+            // Update shipping review
+            var shippingHtml = `
+                <p><strong>${$('#FullName').val()}</strong></p>
+                <p>${$('#Address').val()}</p>
+                <p>${$('#City').val()}, ${$('#State').val()} ${$('#ZipCode').val()}</p>
+                <p>${$('#PhoneNumber').val()}</p>
+                <p>${$('#Email').val()}</p>
+            `;
+            $('#shippingReview').html(shippingHtml);
+
+            // Update payment review
+            var cardNumber = $('#CardNumber').val();
+            var lastFour = cardNumber.slice(-4);
+            var paymentHtml = `
+                <p><strong>${$('#CardHolderName').val()}</strong></p>
+                <p>Card ending in •••• ${lastFour}</p>
+                <p>Expires: ${$('#ExpiryDate').val()}</p>
+            `;
+            $('#paymentReview').html(paymentHtml);
+        }
+
+        // Form submission
+        $('#checkoutForm').submit(function(e) {
+            if (!$('#terms').is(':checked')) {
+                e.preventDefault();
+                alert('You must agree to the Terms and Conditions to place your order.');
+                return false;
+            }
+
+            // Show loading state
+            $('#placeOrderBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
+        });
+
+        // Initialize tabs
+        var triggerTabList = [].slice.call(document.querySelectorAll('#checkoutTabs button'))
+        triggerTabList.forEach(function (triggerEl) {
+            var tabTrigger = new bootstrap.Tab(triggerEl)
+            triggerEl.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (validateCurrentTab()) {
+                    tabTrigger.show();
+                    updateReview();
+                }
+            });
+        });
+    </script>
+}

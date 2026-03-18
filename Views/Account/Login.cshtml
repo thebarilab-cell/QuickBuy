@@ -1,0 +1,308 @@
+@model QuickBuy.Web.Models.LoginVM
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - QuickBuy</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .login-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .login-left {
+            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .login-right {
+            padding: 40px;
+        }
+        .brand-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .brand-logo i {
+            font-size: 3rem;
+            color: #4e73df;
+        }
+        .form-control {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+        .form-control:focus {
+            border-color: #4e73df;
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+        .btn-login:hover {
+            background: linear-gradient(135deg, #3a56c4 0%, #1a3a9e 100%);
+        }
+        .divider {
+            position: relative;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .divider:before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ddd;
+        }
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #666;
+            position: relative;
+        }
+        .social-login .btn {
+            border-radius: 8px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <div class="login-card">
+                    <div class="row g-0">
+                        <!-- Left Side - Welcome -->
+                        <div class="col-md-6 d-none d-md-block">
+                            <div class="login-left">
+                                <div class="text-center mb-4">
+                                    <i class="fas fa-shopping-cart fa-4x mb-3"></i>
+                                    <h1>Welcome Back!</h1>
+                                </div>
+                                <p class="lead mb-4">
+                                    Login to access your account, track orders, and enjoy personalized shopping experience.
+                                </p>
+                                <div class="features">
+                                    <div class="d-flex mb-3">
+                                        <i class="fas fa-check-circle fa-lg me-3"></i>
+                                        <div>
+                                            <h6>Fast Checkout</h6>
+                                            <p class="small mb-0">Save your details for faster purchases</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex mb-3">
+                                        <i class="fas fa-check-circle fa-lg me-3"></i>
+                                        <div>
+                                            <h6>Order Tracking</h6>
+                                            <p class="small mb-0">Track all your orders in one place</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex">
+                                        <i class="fas fa-check-circle fa-lg me-3"></i>
+                                        <div>
+                                            <h6>Personalized Offers</h6>
+                                            <p class="small mb-0">Get exclusive deals and recommendations</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Side - Login Form -->
+                        <div class="col-md-6">
+                            <div class="login-right">
+                                <!-- Brand Logo -->
+                                <div class="brand-logo">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <h2 class="mb-0">QuickBuy</h2>
+                                    <p class="text-muted">Sign in to your account</p>
+                                </div>
+
+                                <!-- Display Messages -->
+                                @if (TempData["Success"] != null)
+                                {
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        @TempData["Success"]
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                }
+                                @if (TempData["Error"] != null)
+                                {
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        @TempData["Error"]
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                }
+
+                                <!-- Login Form -->
+                                <form asp-action="Login" method="post">
+                                    @Html.AntiForgeryToken()
+                                    
+                                    <input type="hidden" name="returnUrl" value="@(ViewData["ReturnUrl"])" />
+                                    
+                                    <div class="mb-3">
+                                        <label for="Email" class="form-label">Email Address</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-envelope"></i>
+                                            </span>
+                                            <input asp-for="Email" class="form-control" placeholder="Enter your email">
+                                        </div>
+                                        <span asp-validation-for="Email" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="Password" class="form-label">Password</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-lock"></i>
+                                            </span>
+                                            <input asp-for="Password" type="password" class="form-control" placeholder="Enter your password">
+                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <span asp-validation-for="Password" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                                        <div class="form-check">
+                                            <input asp-for="RememberMe" class="form-check-input">
+                                            <label asp-for="RememberMe" class="form-check-label">Remember me</label>
+                                        </div>
+                                        <a asp-action="ForgotPassword" class="text-decoration-none small">
+                                            Forgot password?
+                                        </a>
+                                    </div>
+
+                                    <div class="d-grid mb-4">
+                                        <button type="submit" class="btn btn-login">
+                                            <i class="fas fa-sign-in-alt me-2"></i> Sign In
+                                        </button>
+                                    </div>
+
+                                    <!-- Social Login -->
+                                    <div class="divider">
+                                        <span>Or continue with</span>
+                                    </div>
+
+                                    <div class="row g-2 social-login mb-4">
+                                        <div class="col-6">
+                                            <a href="#" class="btn btn-outline-danger w-100">
+                                                <i class="fab fa-google me-2"></i> Google
+                                            </a>
+                                        </div>
+                                        <div class="col-6">
+                                            <a href="#" class="btn btn-outline-primary w-100">
+                                                <i class="fab fa-facebook-f me-2"></i> Facebook
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Register Link -->
+                                    <div class="text-center">
+                                        <p class="mb-0">Don't have an account?
+                                            <a asp-action="Register" class="text-decoration-none fw-bold">
+                                                Sign up here
+                                            </a>
+                                        </p>
+                                    </div>
+
+                                    <!-- Terms -->
+                                    <div class="text-center mt-4">
+                                        <small class="text-muted">
+                                            By signing in, you agree to our 
+                                            <a href="#" class="text-decoration-none">Terms</a> and 
+                                            <a href="#" class="text-decoration-none">Privacy Policy</a>
+                                        </small>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        // Toggle password visibility
+        $('#togglePassword').click(function() {
+            var passwordInput = $('#Password');
+            var type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+            passwordInput.attr('type', type);
+            $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+        });
+
+        // Form validation
+        $('form').submit(function(e) {
+            var isValid = true;
+            
+            // Clear previous errors
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').remove();
+            
+            // Validate email
+            var email = $('#Email').val();
+            if (!email || !isValidEmail(email)) {
+                $('#Email').addClass('is-invalid');
+                $('#Email').after('<div class="invalid-feedback">Please enter a valid email address</div>');
+                isValid = false;
+            }
+            
+            // Validate password
+            var password = $('#Password').val();
+            if (!password || password.length < 6) {
+                $('#Password').addClass('is-invalid');
+                $('#Password').after('<div class="invalid-feedback">Password must be at least 6 characters</div>');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+
+        function isValidEmail(email) {
+            var re = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            return re.test(email);
+        }
+
+        // Auto-focus on email field
+        $(document).ready(function() {
+            $('#Email').focus();
+        });
+    </script>
+</body>
+</html>

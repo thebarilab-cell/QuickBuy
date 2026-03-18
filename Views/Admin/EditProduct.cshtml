@@ -1,0 +1,296 @@
+﻿@model QuickBuy.Models.Product
+@{
+    ViewData["Title"] = "Edit Product";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Edit Product</h1>
+        <a asp-action="Products" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Products
+        </a>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Product Information</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditProduct" method="post" enctype="multipart/form-data" id="editProductForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="CreatedDate" />
+                        <input type="hidden" asp-for="ImageUrl" />
+
+                        <div class="row">
+                            <!-- Product Name -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Name" class="form-label">Product Name *</label>
+                                <input asp-for="Name" class="form-control" placeholder="Enter product name" required>
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+
+                            <!-- Category -->
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CategoryId" class="form-label">Category *</label>
+                                <select asp-for="CategoryId" class="form-control" required>
+                                    <option value="">Select Category</option>
+                                    @foreach (var category in ViewBag.Categories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"
+                                      placeholder="Enter product description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <!-- Price -->
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="Price" class="form-label">Price ($) *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="Price" type="number" step="0.01" min="0.01"
+                                           class="form-control" placeholder="0.00" required>
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+
+                            <!-- Discount Price -->
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="DiscountPrice" class="form-label">Discount Price ($)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="DiscountPrice" type="number" step="0.01" min="0"
+                                           class="form-control" placeholder="0.00">
+                                </div>
+                                <span asp-validation-for="DiscountPrice" class="text-danger"></span>
+                            </div>
+
+                            <!-- Stock Quantity -->
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="StockQuantity" class="form-label">Stock Quantity *</label>
+                                <input asp-for="StockQuantity" type="number" min="0" class="form-control" required>
+                                <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Status</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           id="isActiveSwitch" asp-for="IsActive" checked>
+                                    <label class="form-check-label" for="isActiveSwitch">
+                                        @(Model.IsActive ? "Active" : "Inactive")
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current Image -->
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Current Image</label>
+                                <div>
+                                    <img src="@Model.ImageUrl" class="img-thumbnail"
+                                         style="width: 200px; height: 200px; object-fit: cover;"
+                                         alt="Current Product Image">
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Image Upload -->
+                        <div class="mb-3">
+                            <label class="form-label">Upload New Image</label>
+                            <input type="file" class="form-control" id="imageUpload"
+                                   accept=".jpg,.jpeg,.png,.gif,.webp">
+                            <small class="text-muted">Recommended size: 800x800px. Max size: 2MB</small>
+                            <div class="mt-2" id="imagePreview" style="display: none;">
+                                <img id="previewImage" class="img-thumbnail"
+                                     style="width: 200px; height: 200px; object-fit: cover;">
+                            </div>
+                        </div>
+
+                        <!-- Image URL (Fallback) -->
+                        <div class="mb-4">
+                            <label class="form-label">Or Enter Image URL</label>
+                            <div class="input-group">
+                                <input type="url" class="form-control" id="imageUrlInput"
+                                       placeholder="https://example.com/image.jpg">
+                                <button type="button" class="btn btn-outline-secondary"
+                                        onclick="useImageUrl()">
+                                    Use URL
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Products" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i> Update Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Preview -->
+        <div class="col-lg-4">
+            <div class="card shadow sticky-top" style="top: 20px;">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Live Preview</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <!-- Product Image -->
+                        <div class="mb-3">
+                            <img id="previewProductImage"
+                                 src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/default-product.png" : Model.ImageUrl)"
+                                 class="img-fluid rounded" style="max-height: 200px;"
+                                 alt="Product Preview">
+                        </div>
+
+                        <!-- Product Info -->
+                        <h5 id="previewProductName" class="text-truncate">@Model.Name</h5>
+                        <div class="mb-2">
+                            <span id="previewProductPrice" class="fs-4 fw-bold text-danger">
+                                $@(Model.DiscountPrice > 0 ? Model.DiscountPrice.Value.ToString("N2") : Model.Price.ToString("N2"))
+                            </span>
+                            @if (Model.DiscountPrice > 0)
+                            {
+                                <span id="previewOriginalPrice" class="text-muted text-decoration-line-through ms-2">
+                                    $@Model.Price.ToString("N2")
+                                </span>
+                            }
+                        </div>
+
+                        <p id="previewProductDescription" class="text-muted small">
+                            @(string.IsNullOrEmpty(Model.Description) ? "No description provided" :
+                                                        (Model.Description.Length > 100 ? Model.Description.Substring(0, 100) + "..." : Model.Description))
+                        </p>
+
+                        <!-- Stock Status -->
+                        <div class="mb-3">
+                            <span id="previewStockStatus" class="badge
+                                @(Model.StockQuantity > 20 ? "bg-success" :
+                                                                                            Model.StockQuantity > 0 ? "bg-warning" : "bg-danger")">
+                                @(Model.StockQuantity > 0 ? $"{Model.StockQuantity} in stock" : "Out of stock")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Image preview for file upload
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImage').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    // Update live preview
+                    document.getElementById('previewProductImage').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Use image URL
+        function useImageUrl() {
+            const url = document.getElementById('imageUrlInput').value;
+            if (url) {
+                document.getElementById('previewProductImage').src = url;
+            }
+        }
+
+        // Live preview updates
+        document.getElementById('Name').addEventListener('input', function(e) {
+            document.getElementById('previewProductName').textContent = e.target.value || 'Product Name';
+        });
+
+        document.getElementById('Description').addEventListener('input', function(e) {
+            const desc = e.target.value;
+            document.getElementById('previewProductDescription').textContent =
+                desc.length > 100 ? desc.substring(0, 100) + '...' : (desc || 'No description provided');
+        });
+
+        document.getElementById('Price').addEventListener('input', updatePricePreview);
+        document.getElementById('DiscountPrice').addEventListener('input', updatePricePreview);
+
+        function updatePricePreview() {
+            const price = parseFloat(document.getElementById('Price').value) || 0;
+            const discount = parseFloat(document.getElementById('DiscountPrice').value) || 0;
+
+            if (discount > 0) {
+                document.getElementById('previewProductPrice').textContent = '$' + discount.toFixed(2);
+                document.getElementById('previewOriginalPrice').textContent = '$' + price.toFixed(2);
+                document.getElementById('previewOriginalPrice').style.display = 'inline';
+            } else {
+                document.getElementById('previewProductPrice').textContent = '$' + price.toFixed(2);
+                document.getElementById('previewOriginalPrice').style.display = 'none';
+            }
+        }
+
+        document.getElementById('StockQuantity').addEventListener('input', function(e) {
+            const stock = parseInt(e.target.value) || 0;
+            const badge = document.getElementById('previewStockStatus');
+
+            if (stock > 20) {
+                badge.className = 'badge bg-success';
+                badge.textContent = stock + ' in stock';
+            } else if (stock > 0) {
+                badge.className = 'badge bg-warning';
+                badge.textContent = stock + ' low stock';
+            } else {
+                badge.className = 'badge bg-danger';
+                badge.textContent = 'Out of stock';
+            }
+        });
+
+        // Status switch
+        document.getElementById('isActiveSwitch').addEventListener('change', function(e) {
+            const label = e.target.nextElementSibling;
+            label.textContent = e.target.checked ? 'Active' : 'Inactive';
+        });
+
+        // Form submission
+        document.getElementById('editProductForm').addEventListener('submit', function(e) {
+            // Here you can add form validation logic
+            const imageFile = document.getElementById('imageUpload').files[0];
+            const imageUrl = document.getElementById('imageUrlInput').value;
+            const currentImageUrl = '@Model.ImageUrl';
+
+            // If new image uploaded, update the hidden ImageUrl field
+            if (imageFile) {
+                // In real implementation, you would upload the file and get the URL
+                // For now, we'll just update with a placeholder
+                document.querySelector('input[name="ImageUrl"]').value = 'updated-image-url.jpg';
+            } else if (imageUrl) {
+                document.querySelector('input[name="ImageUrl"]').value = imageUrl;
+            }
+            // If no new image, keep the current one
+        });
+    </script>
+}

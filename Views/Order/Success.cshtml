@@ -1,0 +1,182 @@
+@model QuickBuy.Models.Order
+@{
+    ViewData["Title"] = "Order Confirmation";
+    var orderNumber = TempData["OrderNumber"] as string;
+    var orderTotal = TempData["OrderTotal"] as string;
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Success Message -->
+            <div class="text-center mb-5">
+                <div class="success-icon mb-4">
+                    <i class="fas fa-check-circle fa-5x text-success"></i>
+                </div>
+                <h1 class="display-4 mb-3">Thank You for Your Order!</h1>
+                <p class="lead text-muted">Your order has been successfully placed.</p>
+            </div>
+
+            <!-- Order Summary Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white text-center">
+                    <h4 class="mb-0">Order Summary</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="order-info">
+                                <h6 class="text-muted">Order Details</h6>
+                                <p><strong>Order Number:</strong> @orderNumber</p>
+                                <p><strong>Order Date:</strong> @DateTime.Now.ToString("MMMM dd, yyyy")</p>
+                                <p><strong>Status:</strong> <span class="badge bg-success">Confirmed</span></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="order-info">
+                                <h6 class="text-muted">Payment Details</h6>
+                                <p><strong>Payment Method:</strong> Credit Card</p>
+                                <p><strong>Payment Status:</strong> <span class="badge bg-success">Paid</span></p>
+                                <p><strong>Total Amount:</strong> <span class="h5 text-primary">@orderTotal</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Order Items</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.OrderItems != null)
+                                {
+                                    foreach (var item in Model.OrderItems)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@item.Product?.ImageUrl" class="rounded me-3" alt="@item.Product?.Name" style="width: 60px; height: 60px; object-fit: cover;">
+                                                    <div>
+                                                        <h6 class="mb-0">@item.Product?.Name</h6>
+                                                        <small class="text-muted">SKU: QB-@item.ProductId</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>@item.Quantity</td>
+                                            <td>$@item.UnitPrice.ToString("N2")</td>
+                                            <td>$@((item.Quantity * item.UnitPrice).ToString("N2"))</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Subtotal</strong></td>
+                                    <td><strong>$@Model.TotalAmount.ToString("N2")</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Shipping Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Shipping Address</h6>
+                            <p>
+                                @Model.ShippingAddress<br>
+                                @Model.ShippingCity, @Model.ShippingState @Model.ShippingZipCode
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Shipping Method</h6>
+                            <p>Standard Shipping (3-5 business days)</p>
+                            <p><strong>Estimated Delivery:</strong> @DateTime.Now.AddDays(5).ToString("MMMM dd, yyyy")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">What's Next?</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3">
+                                <i class="fas fa-envelope fa-2x text-primary mb-3"></i>
+                                <h6>Order Confirmation</h6>
+                                <p class="small text-muted">You'll receive an email confirmation shortly.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3">
+                                <i class="fas fa-shipping-fast fa-2x text-primary mb-3"></i>
+                                <h6>Order Processing</h6>
+                                <p class="small text-muted">Your order is being prepared for shipment.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="p-3">
+                                <i class="fas fa-box-open fa-2x text-primary mb-3"></i>
+                                <h6>Delivery</h6>
+                                <p class="small text-muted">You'll receive tracking information once shipped.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center mt-5">
+                <a asp-controller="Order" asp-action="MyOrders" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-clipboard-list me-2"></i> View My Orders
+                </a>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-shopping-bag me-2"></i> Continue Shopping
+                </a>
+
+                <div class="mt-4">
+                    <a href="#" class="btn btn-outline-secondary">
+                        <i class="fas fa-print me-2"></i> Print Receipt
+                    </a>
+                    <a href="#" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-download me-2"></i> Download Invoice
+                    </a>
+                </div>
+            </div>
+
+            <!-- Support Information -->
+            <div class="alert alert-light mt-5">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-headset fa-2x text-primary me-3"></i>
+                    <div>
+                        <h6 class="mb-1">Need Help?</h6>
+                        <p class="mb-0">Contact our customer support team at <strong>support@quickbuy.com</strong> or call <strong>(123) 456-7890</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

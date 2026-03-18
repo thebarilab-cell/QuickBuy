@@ -1,0 +1,385 @@
+@model QuickBuy.Web.Models.ProductVM
+@{
+    ViewData["Title"] = Model?.Name ?? "Product Details";
+}
+
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Product" asp-action="Category" asp-route-id="@Model.CategoryId">@Model.CategoryName</a></li>
+            <li class="breadcrumb-item active">@Model.Name</li>
+        </ol>
+    </nav>
+
+    <!-- ? ADD NULL CHECK -->
+    @if (Model == null)
+    {
+        <div class="alert alert-warning">
+            <h4>Product Not Found</h4>
+            <p>The product you're looking for doesn't exist or has been removed.</p>
+            <a asp-action="Index" class="btn btn-primary">Back to Products</a>
+        </div>
+        return;
+    }
+
+    <div class="row">
+        <!-- Product Images -->
+        <div class="col-lg-6">
+            <div class="product-images">
+                <!-- Main Image -->
+                <div class="main-image mb-3">
+                    <img src="@Model.ImageUrl" class="img-fluid rounded" alt="@Model.Name" id="mainProductImage">
+                </div>
+
+                <!-- Thumbnails -->
+                <div class="thumbnails d-flex gap-2">
+                    <div class="thumbnail active" onclick="changeImage('@Model.ImageUrl')">
+                        <img src="@Model.ImageUrl" class="img-thumbnail" alt="Thumbnail 1" style="width: 80px; height: 80px; object-fit: cover;">
+                    </div>
+                    <!-- Additional thumbnails would come from product gallery -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details -->
+        <div class="col-lg-6">
+            <div class="product-details">
+                <!-- Badges -->
+                <div class="badges mb-3">
+                    <!-- ? FIX: Check DiscountPrice safely -->
+                    @if (Model.DiscountPrice > 0 && Model.DiscountPrice > 0)
+                    {
+                        <span class="badge bg-danger me-2">
+                            SAVE @Model.DiscountPercentage%
+                        </span>
+                    }
+                    <span class="badge bg-info me-2">@Model.CategoryName</span>
+                    @if (Model.StockQuantity > 10)
+                    {
+                        <span class="badge bg-success">In Stock</span>
+                    }
+                    else if (Model.StockQuantity > 0)
+                    {
+                        <span class="badge bg-warning">Low Stock</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Out of Stock</span>
+                    }
+                </div> <!-- ? ADDED MISSING CLOSING DIV -->
+                <!-- Title -->
+                <h1 class="product-title mb-3">@Model.Name</h1>
+
+                <!-- Rating -->
+                <div class="rating mb-3">
+                    <span class="text-warning">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </span>
+                    <span class="text-muted ms-2">(4.5/5.0 - 128 reviews)</span>
+                </div>
+
+                <!-- Price -->
+                <div class="price-section mb-4">
+                    <!-- ? FIX: Check DiscountPrice with null check -->
+                    @if (Model.DiscountPrice > 0 && Model.DiscountPrice > 0)
+                    {
+                        <div class="d-flex align-items-center">
+                            <span class="text-danger display-4 fw-bold me-3">
+                                $@Model.DiscountPrice.ToString("N2")
+                            </span>
+                            <span class="text-muted text-decoration-line-through h4">
+                                $@Model.Price.ToString("N2")
+                            </span>
+                            <span class="badge bg-success ms-3 py-2 px-3">
+                                Save $@Model.Savings.ToString("N2")
+                            </span>
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="display-4 fw-bold">$@Model.Price.ToString("N2")</span>
+                    }
+                </div>
+
+                <!-- Stock Status -->
+                <div class="stock-status mb-4">
+                    @if (Model.StockQuantity > 0)
+                    {
+                        <p class="text-success">
+                            <i class="fas fa-check-circle"></i>
+                            @(Model.StockQuantity > 10 ? "Available" : $"Only {Model.StockQuantity} left in stock")
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="text-danger">
+                            <i class="fas fa-times-circle"></i> Currently out of stock
+                        </p>
+                    }
+                </div>
+
+                <!-- Description -->
+                <div class="description mb-4">
+                    <h5>Description</h5>
+                    <p>@Model.Description</p>
+                </div>
+
+                <!-- Quantity Selector -->
+                @if (Model.StockQuantity > 0)
+                {
+                    <div class="quantity-selector mb-4">
+                        <h5>Quantity</h5>
+                        <div class="input-group" style="width: 150px;">
+                            <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity()">-</button>
+                            <input type="number" class="form-control text-center" id="quantity" value="1" min="1" max="@Model.StockQuantity">
+                            <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity()">+</button>
+                        </div>
+                        <small class="text-muted">Max: @Model.StockQuantity items</small>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons mb-4">
+                        <div class="d-grid gap-2 d-md-flex">
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post" class="me-2">
+                                <input type="hidden" name="productId" value="@Model.Id" />
+                                <input type="hidden" name="quantity" value="1" id="quantityInput" />
+                                <button type="button" class="btn btn-primary btn-lg" onclick="addToCart()">
+                                    <i class="fas fa-cart-plus me-2"></i> Add to Cart
+                                </button>
+                            </form>
+                            <button class="btn btn-outline-primary btn-lg" onclick="buyNow()">
+                                <i class="fas fa-bolt me-2"></i> Buy Now
+                            </button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="out-of-stock mb-4">
+                        <div class="alert alert-warning">
+                            <h5><i class="fas fa-bell me-2"></i> Out of Stock</h5>
+                            <p>This product is currently unavailable. Enter your email to be notified when it's back in stock.</p>
+                            <div class="input-group">
+                                <input type="email" class="form-control" placeholder="Your email address">
+                                <button class="btn btn-primary">Notify Me</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Product Info -->
+                <div class="product-info">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>
+                                <strong><i class="fas fa-shipping-fast me-2"></i> Free Shipping</strong><br>
+                                <small class="text-muted">On orders over $50</small>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>
+                                <strong><i class="fas fa-undo-alt me-2"></i> 30-Day Returns</strong><br>
+                                <small class="text-muted">Easy return policy</small>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>
+                                <strong><i class="fas fa-shield-alt me-2"></i> Warranty</strong><br>
+                                <small class="text-muted">1 year manufacturer warranty</small>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>
+                                <strong><i class="fas fa-headset me-2"></i> Support</strong><br>
+                                <small class="text-muted">24/7 customer support</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Sections -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <!-- Tabs -->
+            <ul class="nav nav-tabs" id="productTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description">
+                        Description
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs">
+                        Specifications
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews">
+                        Reviews (128)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping">
+                        Shipping & Returns
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content p-4 border border-top-0 rounded-bottom" id="productTabsContent">
+                <div class="tab-pane fade show active" id="description">
+                    <h4>Product Details</h4>
+                    <p>@Model.Description</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                </div>
+                <div class="tab-pane fade" id="specs">
+                    <h4>Technical Specifications</h4>
+                    <table class="table">
+                        <tr><th>Brand</th><td>QuickBuy Premium</td></tr>
+                        <tr><th>Model</th><td>QB-@Model.Id</td></tr>
+                        <tr><th>Color</th><td>Black</td></tr>
+                        <tr><th>Weight</th><td>1.2 kg</td></tr>
+                        <tr><th>Dimensions</th><td>10 x 15 x 5 cm</td></tr>
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="reviews">
+                    <h4>Customer Reviews</h4>
+                    <div class="review-summary mb-4">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h1 class="display-4 text-warning">4.5</h1>
+                                    <div class="rating">
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <i class="fas fa-star-half-alt text-warning"></i>
+                                    </div>
+                                    <p class="text-muted">Based on 128 reviews</p>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <!-- Review stats would go here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="shipping">
+                    <h4>Shipping Information</h4>
+                    <ul>
+                        <li>Free standard shipping on orders over $50</li>
+                        <li>Express shipping available at $9.99</li>
+                        <li>Estimated delivery: 3-5 business days</li>
+                        <li>International shipping available</li>
+                    </ul>
+                    <h4 class="mt-4">Return Policy</h4>
+                    <ul>
+                        <li>30-day return policy</li>
+                        <li>Items must be in original condition</li>
+                        <li>Free returns for defective items</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    @if (ViewBag.RelatedProducts != null)
+    {
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3 class="mb-4">Related Products</h3>
+                <div class="row g-4">
+                    @foreach (var product in ViewBag.RelatedProducts)
+                    {
+                        <div class="col-lg-3 col-md-4 col-sm-6">
+                            <div class="card h-100">
+                                <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: cover;">
+                                <div class="card-body">
+                                    <h6 class="card-title">@product.Name</h6>
+                                    <div class="price mb-3">
+                                        @if (product.DiscountPrice > 0)
+                                        {
+                                            <span class="text-danger fw-bold">$@product.DiscountPrice.ToString("N2")</span>
+                                            <span class="text-muted text-decoration-line-through small ms-2">$@product.Price.ToString("N2")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="fw-bold">$@product.Price.ToString("N2")</span>
+                                        }
+                                    </div>
+                                    <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-sm btn-outline-primary w-100">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Image change function
+        function changeImage(imageUrl) {
+            $('#mainProductImage').attr('src', imageUrl);
+            $('.thumbnail').removeClass('active');
+            $(event.target).closest('.thumbnail').addClass('active');
+        }
+
+        // Quantity functions
+        function increaseQuantity() {
+            var quantityInput = $('#quantity');
+            var max = @Model.StockQuantity;
+            var current = parseInt(quantityInput.val());
+            if (current < max) {
+                quantityInput.val(current + 1);
+            }
+        }
+
+        function decreaseQuantity() {
+            var quantityInput = $('#quantity');
+            var current = parseInt(quantityInput.val());
+            if (current > 1) {
+                quantityInput.val(current - 1);
+            }
+        }
+
+        // Add to cart function
+        function addToCart() {
+            var quantity = $('#quantity').val();
+            $('#quantityInput').val(quantity);
+
+            // Submit the form
+            $('form').submit();
+        }
+
+        // Buy now function
+        function buyNow() {
+            var quantity = $('#quantity').val();
+            // Redirect to checkout with this product
+            window.location.href = '@Url.Action("Checkout", "Order")?productId=@Model.Id&quantity=' + quantity;
+        }
+
+        // Initialize product tabs
+        var triggerTabList = [].slice.call(document.querySelectorAll('#productTabs button'))
+        triggerTabList.forEach(function (triggerEl) {
+            var tabTrigger = new bootstrap.Tab(triggerEl)
+            triggerEl.addEventListener('click', function (event) {
+                event.preventDefault()
+                tabTrigger.show()
+            })
+        });
+    </script>
+}
